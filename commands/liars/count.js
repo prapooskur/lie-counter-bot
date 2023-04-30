@@ -15,10 +15,25 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('lie')
         .setDescription('Adds 1 to the lie counter')
-        .addUserOption  (option =>
-            option.setName('liar')  // Add better name later
-                .setDescription('The liar in question')
-                .setRequired(true)),
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('add')
+                .setDescription('Add a lie to a user.')
+                .addUserOption  (option =>
+                    option.setName('liar')  // Add better name later
+                        .setDescription('The liar in question')
+                        .setRequired(true))
+        )
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('count')
+                .setDescription('Count how many times a user has lied.')
+                .addUserOption  (option =>
+                    option.setName('liar')  // Add better name later
+                        .setDescription('The liar in question')
+                        .setRequired(true))
+        ),
+        
 
 
             
@@ -55,23 +70,48 @@ module.exports = {
         
 
 //        console.log(output.length)
-    
-        if (output.length == 0) {
-            console.log("adding "+liarid+" to db")
-            await cookieDB.insert("lies", {
-                uid: liarid,
-                lieCount: 1,
-            });
-            lieCount = 1
-        } else {
-            outputKey = output[0].key 
-            lieCount = output[0].lieCount+1
-            await cookieDB.update("lies", outputKey, {
-                lieCount: lieCount,
-            });
-        }
+        reply = "This message should never be seen. If the bot responded with this, congratulations!"
 
-        await interaction.reply(pingliar+" has lied "+lieCount+" time(s).");
+        switch (subcommand) {
+            case 'add':
+                if (output.length == 0) {
+                    console.log("adding "+liarid+" to db")
+                    await cookieDB.insert("lies", {
+                        uid: liarid,
+                        lieCount: 1,
+                    });
+                    lieCount = 1
+                } else {
+                    outputKey = output[0].key 
+                    lieCount = output[0].lieCount+1
+                    await cookieDB.update("lies", outputKey, {
+                        lieCount: lieCount,
+                    });
+                }
+        
+                if (lieCount != 1) {
+                    reply = pingliar+" has lied "+lieCount+" times."
+                } else {
+                    reply = pingliar+" has lied "+lieCount+" time."
+                }
+                
+            case 'count':
+                if (output.length == 0) {
+                    lieCount = 0
+                } else {
+                    lieCount = output[0].lieCount
+                }
+        
+                if (lieCount == 0) {
+                    reply = pingliar+" has never been caught in a lie. Congratulations!"
+                } else if (lieCount != 1) {
+                    reply = pingliar+" has lied "+lieCount+" times."
+                } else {
+                    reply = pingliar+" has lied "+lieCount+" time."
+                }
+        }
+    
+        await interaction.reply(reply);
 
         /*
         lieCount = await cookieDB.get("lies", lieCount)  
