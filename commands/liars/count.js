@@ -113,7 +113,7 @@ module.exports = {
                 break;
         }
     
-        await interaction.reply(reply);
+        await interaction.reply({ content: reply, allowedMentions: { parse: [] }});
 
         /*
         lieCount = await cookieDB.get("lies", lieCount)  
