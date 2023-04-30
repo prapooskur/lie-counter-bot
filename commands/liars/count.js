@@ -72,6 +72,7 @@ module.exports = {
 //        console.log(output.length)
         reply = "This message should never be seen. If the bot responded with this, congratulations!"
 
+        console.log(interaction.options.getSubcommand())
         switch (interaction.options.getSubcommand()) {
             case 'add':
                 if (output.length == 0) {
@@ -94,7 +95,7 @@ module.exports = {
                 } else {
                     reply = pingliar+" has lied "+lieCount+" time."
                 }
-                
+                break;
             case 'count':
                 if (output.length == 0) {
                     lieCount = 0
@@ -109,6 +110,7 @@ module.exports = {
                 } else {
                     reply = pingliar+" has lied "+lieCount+" time."
                 }
+                break;
         }
     
         await interaction.reply(reply);
