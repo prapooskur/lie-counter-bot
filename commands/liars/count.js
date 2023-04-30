@@ -72,7 +72,7 @@ module.exports = {
 //        console.log(output.length)
         reply = "This message should never be seen. If the bot responded with this, congratulations!"
 
-        switch (subcommand) {
+        switch (interaction.options.getSubcommand()) {
             case 'add':
                 if (output.length == 0) {
                     console.log("adding "+liarid+" to db")
