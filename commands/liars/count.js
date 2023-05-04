@@ -46,11 +46,12 @@ module.exports = {
 
 //        await cookieDB.dropTable("lies")
 
+	/*
         await cookieDB.createTable("lies", {
             uid: "string",
             lieCount: "number",
           });
-
+	*/
 
         
         output = await cookieDB.select("lies", `eq($uid,'${liarid}')`, {
@@ -89,6 +90,8 @@ module.exports = {
                         lieCount: lieCount,
                     });
                 }
+
+		console.log("added loar to db")
         
                 if (lieCount != 1) {
                     reply = pingliar+" has lied "+lieCount+" times."
@@ -113,7 +116,7 @@ module.exports = {
                 break;
         }
     
-        await interaction.reply({ content: reply, allowedMentions: { parse: [] }});
+        await interaction.reply(reply);
 
         /*
         lieCount = await cookieDB.get("lies", lieCount)  
