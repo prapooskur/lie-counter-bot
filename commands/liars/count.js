@@ -91,7 +91,7 @@ module.exports = {
                     });
                 }
 
-		console.log("added loar to db")
+		console.log("added liar to db")
         
                 if (lieCount != 1) {
                     reply = pingliar+" has lied "+lieCount+" times."
