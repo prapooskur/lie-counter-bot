@@ -32,7 +32,20 @@ module.exports = {
                     option.setName('liar')  // Add better name later
                         .setDescription('The liar in question')
                         .setRequired(true))
-        ),
+        )
+	.addSubcommand(subcommand =>
+	    subcommand
+		.setName('set')
+		.setDescription('Manually edit a user\'s lie count (uid-locked, don\'t use this if you don\'t have access)')
+		.addUserOption  (option =>
+		    option.setName('liar')  // Add better name later
+                        .setDescription('The liar in question')
+                        .setRequired(true))
+		.addIntegerOption  (option =>   
+		    option.setName('liecount')  // Add better name later
+                        .setDescription('The number of lies the liar is guilty of')
+                        .setRequired(true))
+	),
         
 
 
@@ -42,40 +55,24 @@ module.exports = {
         liarid = liar?.id.toString()
         pingliar = "<@"+liar+">"
         console.log("the liar is "+liarid);
-
-
-//        await cookieDB.dropTable("lies")
-
-	/*
-        await cookieDB.createTable("lies", {
-            uid: "string",
-            lieCount: "number",
-          });
-	*/
-
         
         output = await cookieDB.select("lies", `eq($uid,'${liarid}')`, {
             maxResults: 1,
-//            return: { uid: "$uid2" },
         });
-//        console.log(output)
           
 
-        /*
-        output = await cookieDB.select("lies", "eq($uid, '1100943524708495370')", {
-            maxResults: 1,
-            return: { uid: "$uid2" },
-        });
-        */
-
-        
-
-//        console.log(output.length)
         reply = "This message should never be seen. If the bot responded with this, congratulations!"
+	ephem = false
+        // see if this stops the random crashing
+	await interaction.deferReply();
 
-        console.log(interaction.options.getSubcommand())
+	console.log(interaction.options.getSubcommand())
         switch (interaction.options.getSubcommand()) {
             case 'add':
+		if (liarid == "put-liecounter-uid-here") {
+		    console.log("target is lie counter");
+		    liecount = -1
+		}
                 if (output.length == 0) {
                     console.log("adding "+liarid+" to db")
                     await cookieDB.insert("lies", {
@@ -83,6 +80,7 @@ module.exports = {
                         lieCount: 1,
                     });
                     lieCount = 1
+		    console.log("added liar to db")
                 } else {
                     outputKey = output[0].key 
                     lieCount = output[0].lieCount+1
@@ -91,12 +89,12 @@ module.exports = {
                     });
                 }
 
-		console.log("added liar to db")
-        
-                if (lieCount != 1) {
-                    reply = pingliar+" has lied "+lieCount+" times."
+		if (liarid == "put-liecounter-uid-here") {
+		    reply = "I am infallible.";
+		} else if (lieCount > 1) {
+                    reply = pingliar+" has lied "+lieCount+" times.";
                 } else {
-                    reply = pingliar+" has lied "+lieCount+" time."
+                    reply = pingliar+" has lied "+lieCount+" time.";
                 }
                 break;
             case 'count':
@@ -105,8 +103,11 @@ module.exports = {
                 } else {
                     lieCount = output[0].lieCount
                 }
-        
-                if (lieCount == 0) {
+
+		if (liarid == "put-liecounter-uid-here") {
+		    console.log("target is lie counter");
+		    reply = pingliar+" will never be caught in a lie."
+		} else if (lieCount == 0) {
                     reply = pingliar+" has never been caught in a lie. Congratulations!"
                 } else if (lieCount != 1) {
                     reply = pingliar+" has lied "+lieCount+" times."
@@ -114,10 +115,31 @@ module.exports = {
                     reply = pingliar+" has lied "+lieCount+" time."
                 }
                 break;
-        }
-    
-        await interaction.reply(reply);
+	    case 'set':
 
+		if (interaction.user.id == "put-approved-user-here") {
+		    liecount = interaction.options.getInteger("liecount")
+		    if (output.length == 0) {
+                    	console.log("adding "+liarid+" to db")
+                    	await cookieDB.insert("lies", {
+                    	    uid: liarid,
+                    	    lieCount: liecount,
+                    	});
+                    	console.log("added liar to db")
+                    } else {
+                        outputKey = output[0].key
+                        await cookieDB.update("lies", outputKey, {
+                            lieCount: liecount
+                        });
+                    }
+		    reply = `Set the lie count of ${pingliar} to ${liecount}.`
+		} else {
+		    reply = `I'm afraid I can't do that, <@${interaction.user.id}>.`
+		}
+        }
+	
+        await interaction.editReply(reply);
+        
         /*
         lieCount = await cookieDB.get("lies", lieCount)  
 
