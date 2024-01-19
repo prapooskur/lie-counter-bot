@@ -1,3 +1,4 @@
 config.json
 node_modules
 commands/liars/droptable.js
+lies.db
