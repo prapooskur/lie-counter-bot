@@ -1,0 +1,9 @@
+{
+    "token" : "",
+    "db_token" : "",
+    "clientId" : "",
+    "lie_counter_uid" : "",
+    "trusted_user_uid" : "",
+    "supabase_url": "",
+    "supabase_key": ""
+}
