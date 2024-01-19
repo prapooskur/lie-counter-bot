@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require("discord.js");
 //const fs = require("fs");
 //const { CookieDB } = require("cookie-driver");
 //const { db_token } = require("../../config.json");
-const { sqlite3 } = require("sqlite3");
+const sqlite3 = require("sqlite3").verbose();
 const { lie_counter_uid } = require("../../config.json");
 const { trusted_user_uid } = require("../../config.json");
 
@@ -27,8 +27,7 @@ const db = new sqlite3.Database("./lies.db", sqlite3.OPEN_READWRITE, (err) => {
             )
             `);
         });
-        
-        return newdb;
+        return;
     } else if (err) {
         console.log("Getting error " + err);
         process.exit(1);
