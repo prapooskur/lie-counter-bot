@@ -32,6 +32,14 @@ const rest = new REST().setToken(token);
     try {
         console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
+        console.log(commands);
+
+        commands.forEach(command => {
+            command.integration_types = [0, 1];
+            command.contexts = [0, 1, 2];
+        });
+          
+
         // The put method is used to fully refresh all commands in the guild with the current set
         const data = await rest.put(
             // use global commands instead of guild commands
