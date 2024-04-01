@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
+const { EmbedBuilder } = require('discord.js');
 const { createClient } = require("@supabase/supabase-js");
 const { lie_counter_uid, trusted_user_uid, supabase_url, supabase_key } = require("../../config.json");
 
@@ -45,6 +46,11 @@ module.exports = {
                     option.setName("liecount")  // Add better name later
                         .setDescription("The number of lies the liar is guilty of")
                         .setRequired(true))
+        )
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName("top")
+                .setDescription("Get a list of the best liars")
         ),
         
 
@@ -60,6 +66,7 @@ module.exports = {
 
         let reply = "This message should never be seen. If the bot responded with this, congratulations!";
         await interaction.deferReply();
+        let isTop = false;
 
         console.log(interaction.options.getSubcommand());
         switch (interaction.options.getSubcommand()) {
@@ -121,7 +128,6 @@ module.exports = {
             }
             break;
         case "set":
-
             if (interaction.user.id == trusted_user_uid) {
                 let newCount = interaction.options.getInteger("liecount");
                 // Example: Update the lieCount in the database
@@ -136,8 +142,38 @@ module.exports = {
             } else {
                 reply = `I'm afraid I can't do that, <@${interaction.user.id}>.`;
             }
+            break;
+        case "top":
+            const { topdata, toperror } = await supabase
+                .from("lies")
+                .select()
+                .order('liecount', { ascending: false })
+                .limit(10);
+            if (toperror) throw toperror;
+            if (Array.isArray(topdata) && topdata.length) {
+                let liarList = ""
+                topdata.forEach(liar => {
+                    let pingliar = "<@"+liar.uid+">";
+                    liarList+=pingliar;
+                    liarList+=": ";
+                    liarList+=liar.liecount;
+                    liarList+="\n";
+                })
+                liarList-="\n";
+                const topEmbed = new EmbedBuilder()
+                    .setTitle('Best liars')
+                    .setDescription(liarList)
+                isTop = true;
+                await interaction.editReply({ embeds: [topEmbed] });
+            } else {
+                reply = "Failed to grab top liars. Skill issue?";
+            }
+            
+
         }
-	
-        await interaction.editReply(reply);
+        if (!isTop) {
+            await interaction.editReply(reply);
+        }
+        
     }
 };
