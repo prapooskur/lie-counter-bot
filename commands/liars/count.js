@@ -63,6 +63,7 @@ module.exports = {
         console.log("the liar is "+liarid);
 
         let lieCount;
+        let data, error;
 
         let reply = "This message should never be seen. If the bot responded with this, congratulations!";
         await interaction.deferReply();
@@ -130,8 +131,6 @@ module.exports = {
         case "set":
             if (interaction.user.id == trusted_user_uid) {
                 let newCount = interaction.options.getInteger("liecount");
-                // Example: Update the lieCount in the database
-                //reply = `Set the lie count of ${pingliar} to ${liecount}.`;
                 const { error } = await supabase
                     .from("lies")
                     .upsert({ uid: liarid, liecount: newCount });
@@ -144,22 +143,18 @@ module.exports = {
             }
             break;
         case "top":
-            const { topdata, toperror } = await supabase
+            const { data: topdata, error: toperror } = await supabase
                 .from("lies")
-                .select()
+                .select('uid::text, liecount')
                 .order('liecount', { ascending: false })
                 .limit(10);
             if (toperror) throw toperror;
             if (Array.isArray(topdata) && topdata.length) {
                 let liarList = ""
                 topdata.forEach(liar => {
-                    let pingliar = "<@"+liar.uid+">";
-                    liarList+=pingliar;
-                    liarList+=": ";
-                    liarList+=liar.liecount;
-                    liarList+="\n";
+                    let pingliar = `<@${liar.uid}>`;
+                    liarList += `${pingliar}: ${liar.liecount}\n`;
                 })
-                liarList-="\n";
                 const topEmbed = new EmbedBuilder()
                     .setTitle('Best liars')
                     .setDescription(liarList)
