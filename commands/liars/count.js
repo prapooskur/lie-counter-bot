@@ -51,7 +51,12 @@ module.exports = {
             subcommand
                 .setName("top")
                 .setDescription("Get a list of the best liars")
-        ),
+        )
+	.addSubcommand(subcommand =>
+	   subcommand
+		.setName("pure")
+		.setDescription("Get a list of the purest liars")
+	),
         
 
 
@@ -67,7 +72,7 @@ module.exports = {
 
         let reply = "This message should never be seen. If the bot responded with this, congratulations!";
         await interaction.deferReply();
-        let isTop = false;
+        let isEmbed = false;
 
         console.log(interaction.options.getSubcommand());
         switch (interaction.options.getSubcommand()) {
@@ -158,15 +163,36 @@ module.exports = {
                 const topEmbed = new EmbedBuilder()
                     .setTitle('Best liars')
                     .setDescription(liarList)
-                isTop = true;
+                isEmbed = true;
                 await interaction.editReply({ embeds: [topEmbed] });
             } else {
                 reply = "Failed to grab top liars. Skill issue?";
             }
+	case "pure":
+	    const { data: puredata, error: pureerror } = await supabase
+                .from("lies")
+                .select('uid::text, liecount')
+                .order('liecount', { ascending: true })
+                .limit(10);
+            if (pureerror) throw pureerror;
+            if (Array.isArray(puredata) && puredata.length) {
+                let liarList = ""
+                puredata.forEach(liar => {
+                    let pingliar = `<@${liar.uid}>`;
+                    liarList += `${pingliar}: ${liar.liecount}\n`;
+                })
+                const pureEmbed = new EmbedBuilder()
+                    .setTitle('Purest liars')
+                    .setDescription(liarList)
+                isEmbed = true;
+                await interaction.editReply({ embeds: [pureEmbed] });
+            } else {
+                reply = "Failed to grab purest liars. Skill issue?";
+            }
             
 
         }
-        if (!isTop) {
+        if (!isEmbed) {
             await interaction.editReply(reply);
         }
         
