@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { EmbedBuilder } = require('discord.js');
 const { createClient } = require("@supabase/supabase-js");
-const { lie_counter_uid, trusted_user_uid, supabase_url, supabase_key } = require("../../config.json");
+const { lie_counter_uid, trusted_user_uid, supabase_url, supabase_key, supabase_table } = require("../../config.json");
 
 const supabase = createClient(supabase_url, supabase_key, {
     auth: {
@@ -82,7 +82,7 @@ module.exports = {
                 reply = "I am infallible.";
             } else {
                 const { data, error } = await supabase
-                    .from("lies")
+                    .from(supabase_table)
                     .select()
                     .eq("uid", liarid)
                     .maybeSingle();
@@ -91,7 +91,7 @@ module.exports = {
                     console.log("liar exists, updating");
                     let newCount = data.liecount+1;
                     const { error } = await supabase
-                        .from("lies")
+                        .from(supabase_table)
                         .update({ liecount: newCount })
                         .eq("uid", liarid);
                     if (error) throw error;
@@ -99,7 +99,7 @@ module.exports = {
                 } else {
                     console.log("liar does not exist, inserting");
                     const { error } = await supabase
-                        .from("lies")
+                        .from(supabase_table)
                         .insert({ uid: liarid, liecount: 1 });
                     if (error) throw error;
                     lieCount = 1;
@@ -111,7 +111,7 @@ module.exports = {
             break;
         case "count":
             const { data, error } = await supabase
-                .from("lies")
+                .from(supabase_table)
                 .select()
                 .eq("uid", liarid)
                 .maybeSingle();
@@ -137,8 +137,8 @@ module.exports = {
             if (interaction.user.id == trusted_user_uid) {
                 let newCount = interaction.options.getInteger("liecount");
                 const { error } = await supabase
-                    .from("lies")
-                    .upsert({ uid: liarid, liecount: newCount });
+                    .from(supabase_table)
+                    .upsert({ uid: liarid, liecount: newCount }, { onConflict: 'uid' });
                 if (error) throw error;
                 
                 reply = `Set the lie count of ${pingliar} to ${newCount}.`;
@@ -149,7 +149,7 @@ module.exports = {
             break;
         case "top":
             const { data: topdata, error: toperror } = await supabase
-                .from("lies")
+                .from(supabase_table)
                 .select('uid::text, liecount')
                 .order('liecount', { ascending: false })
                 .limit(10);
@@ -168,10 +168,12 @@ module.exports = {
             } else {
                 reply = "Failed to grab top liars. Skill issue?";
             }
+	    break;
 	case "pure":
 	    const { data: puredata, error: pureerror } = await supabase
-                .from("lies")
+                .from(supabase_table)
                 .select('uid::text, liecount')
+		.gt('liecount', 0)
                 .order('liecount', { ascending: true })
                 .limit(10);
             if (pureerror) throw pureerror;
