@@ -15,7 +15,7 @@ const supabase = createClient(supabase_url, supabase_key, {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("lie")
-        .setDescription("Adds 1 to the lie counter")
+        .setDescription("Lie management command")
         .addSubcommand(subcommand =>
             subcommand
                 .setName("add")
