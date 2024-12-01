@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { EmbedBuilder } = require('discord.js');
-const { lie_counter_uid, trusted_user_uid, supabase_table } = require("../../config.json");
-const { add, count, set, pure } = require("../../backend/supabase");
+const { lie_counter_uid, trusted_user_uid } = require("../../config.json");
+const { add, count, set, top, pure } = require("../../backend/supabase");
 
 module.exports = {
     data: new SlashCommandBuilder()

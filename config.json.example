@@ -5,5 +5,6 @@
     "trusted_user_uid" : "",
     "supabase_url": "",
     "supabase_key": "",
-    "supabase_table": ""
+    "db_table": "",
+    "db_conn_string": "",
 }

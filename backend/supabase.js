@@ -1,5 +1,5 @@
 const { createClient } = require("@supabase/supabase-js");
-const { lie_counter_uid, trusted_user_uid, supabase_url, supabase_key, supabase_table } = require("../config.json");
+const { lie_counter_uid, trusted_user_uid, supabase_url, supabase_key, db_table } = require("../config.json");
 
 const supabase = createClient(supabase_url, supabase_key, {
     auth: {
@@ -12,7 +12,7 @@ const supabase = createClient(supabase_url, supabase_key, {
 async function add(uid) {
     
     const { data, error } = await supabase
-        .from(supabase_table)
+        .from(db_table)
         .select()
         .eq("uid", uid)
         .maybeSingle();
@@ -21,14 +21,14 @@ async function add(uid) {
     if (data) {
         const newCount = data.liecount + 1;
         const { error: updateError } = await supabase
-            .from(supabase_table)
+            .from(db_table)
             .update({ liecount: newCount })
             .eq("uid", uid);
         if (updateError) throw updateError;
         return newCount;
     } else {
         const { error: insertError } = await supabase
-            .from(supabase_table)
+            .from(db_table)
             .insert({ uid, liecount: 1 });
         if (insertError) throw insertError;
         return 1;
@@ -37,7 +37,7 @@ async function add(uid) {
 
 async function count(uid) {
     const { data, error } = await supabase
-        .from(supabase_table)
+        .from(db_table)
         .select()
         .eq("uid", uid)
         .maybeSingle();
@@ -50,7 +50,7 @@ async function count(uid) {
 
 async function set(uid, newCount) {
     const { error } = await supabase
-        .from(supabase_table)
+        .from(db_table)
         .upsert({ uid, liecount: newCount }, { onConflict: 'uid' });
     if (error) throw error;
     return newCount;
@@ -58,7 +58,7 @@ async function set(uid, newCount) {
 
 async function top() {
     const {data, error} = await supabase
-        .from(supabase_table)
+        .from(db_table)
         .select('uid::text, liecount')
         .order('liecount', { ascending: false })
         .limit(10);
@@ -69,7 +69,7 @@ async function top() {
 
 async function pure() {
     const {data, error} = await supabase
-        .from(supabase_table)
+        .from(db_table)
         .select('uid::text, liecount')
         .order('liecount', { ascending: true })
         .limit(10);
