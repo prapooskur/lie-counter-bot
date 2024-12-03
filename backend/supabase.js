@@ -43,9 +43,9 @@ async function count(uid) {
         .maybeSingle();
     if (error) throw error;
 
-    console.log(data, data.liecount)
+    console.log(data)
 
-    return data.liecount ? data.liecount : 0;
+    return data?.liecount ?? 0;
 }
 
 async function set(uid, newCount) {

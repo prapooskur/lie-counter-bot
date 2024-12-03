@@ -1,45 +1,36 @@
 const { db_table, neon_conn_string } = require("../config.json");
-import { neon } from "@neondatabase/serverless";
+const { neon } = require("@neondatabase/serverless");
 
 const sql = neon(neon_conn_string);
 
 async function add(uid) {
-    
-    // const { data, error } = await supabase
-    //     .from(db_table)
-    //     .select()
-    //     .eq("uid", uid)
-    //     .maybeSingle();
 
-    const data = await sql('SELECT * FROM $1 WHERE uid = $2', db_table, uid);
+    const data = await sql(`SELECT * FROM ${db_table} WHERE uid = $1`, [uid]);
 
     if (data) {
-        const newCount = data.liecount + 1;
-        await sql('UPDATE $1 SET liecount= $2 WHERE uid = $3', db_table, newCount, uid);
-        
-        // const { error: updateError } = await supabase
-        //     .from(db_table)
-        //     .update({ liecount: newCount })
-        //     .eq("uid", uid);
-        // if (updateError) throw updateError;
+        const newCount = (data[0]?.liecount ?? 0) + 1;
+        await sql(`UPDATE ${db_table} SET liecount = $1 WHERE uid = $2`, [newCount, uid]);
         return newCount;
     } else {
-        const out = await sql('INSERT INTO $1 (uid, liecount) VALUES ($2, $3)', db_table, uid, 1);
+        const out = await sql(`INSERT INTO ${db_table} (uid, liecount) VALUES ($1, $2)`, [uid, 1]);
         console.log(out)
         return 1;
     }
 }
 
 async function count(uid) {
-    const data = await sql('SELECT * FROM $1 WHERE uid = $2', db_table, uid);
 
-    console.log(data, data.liecount)
+    console.log("pre ", uid)
+    
+    const liecount = await sql(`SELECT liecount FROM ${db_table} WHERE uid = $1`, [uid]);
 
-    return data.liecount ? data.liecount : 0;
+    console.log(liecount)
+
+    return liecount[0].liecount ? liecount[0].liecount : 0;
 }
 
 async function set(uid, newCount) {
-    await sql('INSERT INTO $1 (uid, liecount) VALUES ($2, $3) ON CONFLICT (uid) DO UPDATE SET liecount = EXCLUDED.liecount', db_table, uid, liecount)
+    await sql(`INSERT INTO ${db_table} (uid, liecount) VALUES ($1, $2) ON CONFLICT (uid) DO UPDATE SET liecount = EXCLUDED.liecount`, [uid, newCount])
 
     return newCount;
 }

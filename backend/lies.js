@@ -1,5 +1,5 @@
 // scuffed impl of an interface
-const { add: addLie, count: countLies, set: setLies, top: topLies, pure: pureLies } = require("../../backend/neon");
+const { add: addLie, count: countLies, set: setLies, top: topLies, pure: pureLies } = require("./neon");
 
 async function add(uid) {
     return addLie(uid);

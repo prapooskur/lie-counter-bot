@@ -1,6 +1,6 @@
 const { ContextMenuCommandBuilder, ApplicationCommandType } = require('discord.js');
 const { lie_counter_uid } = require("../../config.json");
-const { count } = require('../../backend/supabase');
+const { count } = require('../../backend/lies');
 
 module.exports = {
     data: new ContextMenuCommandBuilder()
