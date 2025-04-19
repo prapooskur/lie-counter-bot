@@ -26,6 +26,10 @@ async function count(uid) {
 
     console.log(liecount)
 
+    if (liecount.length === 0) {
+        return 0
+    }
+
     return liecount[0].liecount ? liecount[0].liecount : 0;
 }
 

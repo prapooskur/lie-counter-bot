@@ -3,6 +3,36 @@ const { EmbedBuilder } = require('discord.js');
 const { lie_counter_uid, trusted_user_uid } = require("../../config.json");
 const { add, count, set, top, pure } = require("../../backend/lies");
 
+const faq_string = `I just lie added your message.
+
+# FAQ
+## What does this mean?
+
+The amount of lies on your account has increased by one.
+
+## Why did you do this?
+
+There are several reasons I may deem a message to be worthy of a lie. These include, but are not limited to:
+
+- Rudeness towards other Discorders,
+
+- Spreading incorrect information,
+
+- Sarcasm not correctly flagged with a /s.
+
+## Am I banned from the Discord?
+
+No - not yet. But you should refrain from making posts like this in the future. Otherwise I will be forced to issue an additional lie, which may put your message posting privileges in jeopardy.
+
+## I don't believe my post deserved a lie add. Can you un-lie it?
+
+Sure, mistakes happen. But only in exceedingly rare circumstances will I undo a lie add. If you would like to issue an appeal, shoot me a private message explaining what I got wrong. I tend to respond to Discord DMs within several minutes. Do note, however, that over 99.9% of lie add appeals are rejected, and yours is likely no exception.
+
+## How can I prevent this from happening in the future?
+
+Accept the lie add and move on. But learn from this mistake: your behavior will not be tolerated on discordapp.com. I will continue to issue lie adds until you improve your conduct. Remember: Discord is privilege, not a right.
+`;
+
 module.exports = {
     data: new SlashCommandBuilder()
         .setName("lie")
@@ -41,12 +71,17 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName("top")
-                .setDescription("Get a list of the best liars")
+                .setDescription("Get a list of the worst liars")
         )
 	.addSubcommand(subcommand =>
 	   subcommand
 		.setName("pure")
 		.setDescription("Get a list of the purest liars")
+	)
+	.addSubcommand(subcommand =>
+           subcommand
+                .setName("faq")
+                .setDescription("What is a lie?")
 	),
         
 
@@ -116,7 +151,7 @@ module.exports = {
                         liarList += `${pingliar}: ${liar.liecount}\n`;
                     })
                     const topEmbed = new EmbedBuilder()
-                        .setTitle('Best liars')
+                        .setTitle('Worst liars')
                         .setDescription(liarList)
                     isEmbed = true;
                     await interaction.editReply({ embeds: [topEmbed] });
@@ -140,6 +175,10 @@ module.exports = {
                 } else {
                     reply = "Failed to grab purest liars. Skill issue?";
                 }
+		break;
+	    case "faq":
+	        reply = faq_string;
+
         }
         if (!isEmbed) {
             await interaction.editReply(reply);
